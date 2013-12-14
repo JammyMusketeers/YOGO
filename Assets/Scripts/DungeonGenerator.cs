@@ -56,7 +56,7 @@ public class DungeonGenerator
 	
 	public void MakeRoom(int x, int y)
 	{
-		var roomGo = LevelSystem.Instance.GetObject("Environment/Rooms/Room01");
+		var roomGo = LevelSystem.Instance.GetObject("Environment/Rooms/Room03");
 		var roomObject = roomGo.GetComponent<RoomObject>();
 		
 		for (int rx = -1; rx <= roomObject.width + 2; rx++)
