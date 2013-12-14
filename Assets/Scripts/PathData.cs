@@ -10,20 +10,20 @@ public class PathData
 	public float totalCost;
 	#endregion
 	
-	private void ProcessPath(List<PathFinderNode> pathnodes, Vector2 offset)
+	private void ProcessPath(List<PathFinderNode> pathNodes, Vector2 offset)
 	{
-		if (pathnodes == null || pathnodes.Count < 2)
+		if (pathNodes == null || pathNodes.Count < 2)
 			return;
 		
-		pathnodes.Reverse();
+		pathNodes.Reverse();
 			PathFinderNode startNode;
 			PathFinderNode endNode;
 		float cost;
 		
-		for (int i = 0; i < pathnodes.Count-1; i++)
+		for (int i = 0; i < pathNodes.Count-1; i++)
 		{
-			startNode = pathnodes[i];
-			endNode = pathnodes[i+1];
+			startNode = pathNodes[i];
+			endNode = pathNodes[i+1];
 			cost = GetCost(startNode, endNode);
 			totalCost += cost;
 			

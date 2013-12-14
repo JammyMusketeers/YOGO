@@ -38,6 +38,12 @@ public class LevelSystem : MonoSingleton<LevelSystem>
 		return new Vec2i(Mathf.CeilToInt(vector.x / tileSize), Mathf.CeilToInt(vector.z / tileSize));
 	}
 	
+	public Vec2i ToVec2i(Vector4 vector)
+	{
+		var tileSize = (float)GameSettings.Instance.tileSize;
+		return new Vec2i(Mathf.CeilToInt(vector.x / tileSize), Mathf.CeilToInt(vector.z / tileSize));
+	}
+	
 	public GameObject GetObject(string name)
 	{
 		if (!objectCache.ContainsKey(name))

@@ -206,8 +206,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   roomChance: .00999999978
+  roomTangling: 0
   tileSize: 5
-  mapSize: 50
+  mapSize: 64
 --- !u!1001 &896647008
 Prefab:
   m_ObjectHideFlags: 0
@@ -245,11 +246,15 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 9b58f6848c45e564b99550cb138cfed0, type: 2}
       propertyPath: mapSize
-      value: 50
+      value: 64
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 9b58f6848c45e564b99550cb138cfed0, type: 2}
       propertyPath: roomChance
       value: .00999999978
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 9b58f6848c45e564b99550cb138cfed0, type: 2}
+      propertyPath: roomTangling
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 9b58f6848c45e564b99550cb138cfed0, type: 2}

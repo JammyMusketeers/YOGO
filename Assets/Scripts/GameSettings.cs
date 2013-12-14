@@ -5,6 +5,7 @@ public class GameSettings : MonoSingleton<GameSettings>
 {
 	#region Public Members
 	public float roomChance = 0.01f;
+	public bool roomTangling = false;
 	public int tileSize = 5;
 	public int mapSize = 150;
 	#endregion
