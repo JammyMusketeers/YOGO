@@ -1,11 +1,9 @@
 ﻿using UnityEngine;
-
+using System.Collections;
 
 public class LevelSystem : MonoSingleton<LevelSystem>
 {
-	public void Start()
-	{
-	}
+	public void Start() {}
 	
 	public void Awake()
 	{
@@ -13,6 +11,12 @@ public class LevelSystem : MonoSingleton<LevelSystem>
 	
 	public void Hello()
 	{
-		Debug.LogError("Hello!");
+		GenerateDungeon();
+	}
+	
+	public void GenerateDungeon()
+	{
+		var generator = new DungeonGenerator();
+			generator.Generate();
 	}
 }
