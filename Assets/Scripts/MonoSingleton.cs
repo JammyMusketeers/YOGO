@@ -15,9 +15,17 @@ public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
 				return _instance;
 			
 			var type = typeof(T).ToString();
-			var go = new GameObject(type);
-				
-			_instance = go.AddComponent<T>();
+			var go = GameObject.Find(type);
+			
+			if (go == null)
+			{
+				go = new GameObject(type);
+				_instance = go.AddComponent<T>();
+			}
+			else
+			{
+				_instance = go.GetComponent<T>();
+			}
 			
 			return _instance;
 		}
