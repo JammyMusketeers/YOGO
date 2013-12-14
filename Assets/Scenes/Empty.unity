@@ -140,7 +140,7 @@ Camera:
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_RenderingPath: -1
+  m_RenderingPath: 1
   m_TargetTexture: {fileID: 0}
   m_HDR: 0
   m_OcclusionCulling: 1
@@ -205,8 +205,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1da6bc5371efdbf458be54fbd8f99849, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  roomChance: .00999999978
   tileSize: 5
-  mapSize: 150
+  mapSize: 50
 --- !u!1001 &896647008
 Prefab:
   m_ObjectHideFlags: 0
@@ -244,7 +245,11 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 9b58f6848c45e564b99550cb138cfed0, type: 2}
       propertyPath: mapSize
-      value: 150
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 9b58f6848c45e564b99550cb138cfed0, type: 2}
+      propertyPath: roomChance
+      value: .00999999978
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 9b58f6848c45e564b99550cb138cfed0, type: 2}
