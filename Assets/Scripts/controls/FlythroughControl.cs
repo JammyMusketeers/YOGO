@@ -18,7 +18,7 @@ public class FlythroughControl : MonoBehaviour {
 	void Update () 
 	{
 		moveX = Input.GetAxis("Horizontal") * movingSpeed;
-		moveY = Input.GetAxis("Vertical") * movingSpeed;
+		moveY = -Input.GetAxis("Vertical") * movingSpeed;
 
 		turnX += Input.GetAxis("Mouse X") * turnSpeed * Time.deltaTime;
 		turnY += Input.GetAxis("Mouse Y") * turnSpeed * Time.deltaTime;
