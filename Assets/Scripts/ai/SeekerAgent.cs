@@ -49,6 +49,12 @@ public class SeekerAgent : MonoBehaviour {
 
 	void Update () 
 	{
+		// detect collision
+		if ((charCtrl.collisionFlags & CollisionFlags.Sides) != 0) 
+		{
+			transform.Rotate (0, 45 * Time.deltaTime, 0);
+		}
+
 		// do rethink?
 		if (thinkTimer >= thinkInterval)
 		{
@@ -76,12 +82,6 @@ public class SeekerAgent : MonoBehaviour {
 		// move
 		forward = transform.TransformDirection(Vector3.forward);
 		charCtrl.SimpleMove(forward * moveSpeed);
-
-		// detect collision
-		if ((charCtrl.collisionFlags & CollisionFlags.Sides) != 0) 
-		{
-			transform.Rotate (0, 45 * Time.deltaTime, 0);
-		}
 	}
 
 
