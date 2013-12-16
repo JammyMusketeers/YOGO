@@ -14,7 +14,7 @@ public class TitleScreen : MonoBehaviour {
 	{
 		GUI.skin = guiSkin;
 
-		GUILayout.BeginArea(new Rect(Screen.width * 0.45f, 
+		GUILayout.BeginArea(new Rect(Screen.width * 0.425f, 
 		                             Screen.height * 0.7f, 
 		                             Screen.width * 0.2f, 
 		                             Screen.height * 0.3f));
@@ -28,6 +28,10 @@ public class TitleScreen : MonoBehaviour {
 
 	void Update ()
 	{
+		// show cursor
+		Screen.showCursor = true;
+		Screen.lockCursor = false;
+
 		alphaText = Mathf.Sin (Time.timeSinceLevelLoad);
 
 		if (Time.timeSinceLevelLoad > skipDelay)

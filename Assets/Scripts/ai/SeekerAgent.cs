@@ -52,7 +52,7 @@ public class SeekerAgent : MonoBehaviour {
 		// detect collision
 		if ((charCtrl.collisionFlags & CollisionFlags.Sides) != 0) 
 		{
-			transform.Rotate (0, 45 * Time.deltaTime, 0);
+			transform.Rotate (0, turnSpeed * Time.deltaTime, 0);
 		}
 
 		// do rethink?
@@ -88,35 +88,46 @@ public class SeekerAgent : MonoBehaviour {
 
 	bool CheckForPlayer ()
 	{
+		bool success = false;
+
 		if (player == null)
 		{
 			player = GameObject.FindGameObjectWithTag("Player");
 			playerScript = player.GetComponent("PlayerCharacter") as PlayerCharacter;
 		}
 
-		bool success = false;
-		RaycastHit hit = new RaycastHit();
-		Vector3 lookingPoint = player.transform.position - transform.position;
-		if (Physics.Raycast (transform.position, lookingPoint, out hit, viewDistance))
-		{
-			Debug.DrawLine (transform.position, hit.point, Color.red);
-			Collider seesCol = hit.collider;
+		Vector3 targetRelative = player.transform.position - transform.position;
+		Quaternion newRotation = new Quaternion();
+		newRotation.SetLookRotation(targetRelative);
 
-			if (seesCol.gameObject == player) {
-				// I SEE YOU
-				targetDistance = hit.distance;
-				Debug.Log (targetDistance);
-				pursuitTarget = seesCol.transform.position;
-				Alarm();
-				success = true;
-			} else if (alerted) {
-				// player evading...
-				lostSightFor += thinkInterval;
-				PursuitTechniques();
-			}
-			if (lostSightFor > searchTime) {
-				alerted = false;
-				lostSightFor = 0;
+		if (Quaternion.Angle(transform.rotation, newRotation) < viewAngle)
+		{
+			// potentially sees you
+			//Debug.Log ("Should see you.");
+
+			RaycastHit hit = new RaycastHit();
+			Vector3 lookingPoint = player.transform.position - transform.position;
+			if (Physics.Raycast (transform.position, lookingPoint, out hit, viewDistance))
+			{
+				Debug.DrawLine (transform.position, hit.point, Color.red);
+				Collider seesCol = hit.collider;
+				
+				if (seesCol.gameObject == player) {
+					// I SEE YOU
+					targetDistance = hit.distance;
+					Debug.Log (targetDistance);
+					pursuitTarget = seesCol.transform.position;
+					Alarm();
+					success = true;
+				} else if (alerted) {
+					// player evading...
+					lostSightFor += thinkInterval;
+					PursuitTechniques();
+				}
+				if (lostSightFor > searchTime) {
+					alerted = false;
+					lostSightFor = 0;
+				}
 			}
 		}
 
