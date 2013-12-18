@@ -5,8 +5,11 @@ public class SeekerAgent : MonoBehaviour {
 
 	#region Public Members
 	public float moveSpeed = 50f;			// how fast it travels
+	public float chaseSpeed = 100f;			// how fast it goes when alerted
 	public float turnSpeed = 50f;			// how fast it turns
 	public float thinkInterval = 0.2f;		// time between AI rethinks
+	public float directionInterval = 10f;	// time between directional changes
+	public float navTimeout = 5.0f;			// times out getting to a waypoint after this time
 	public float searchTime = 20f;			// time to keep searching after losing sight
 	public float viewDistance = 35f;		// distance it can see
 	public float viewAngle = 45f;			// degrees from forward sight extends to
@@ -20,6 +23,7 @@ public class SeekerAgent : MonoBehaviour {
 	#region Private Members
 	private CharacterController charCtrl;
 	private Vector3 moveVector;
+	private float currentSpeed;				// speed chosen
 	private Vector3 forward;
 	private float currentVelocity;
 	private Vector3 lastPosition;
@@ -27,10 +31,14 @@ public class SeekerAgent : MonoBehaviour {
 	private bool alerted;					// seen player? if so, we will search or chase
 	public float lostSightFor;				// time since player last seen
 	private Vector3 pursuitTarget;
+	private Vector3 navTarget;				// tranform to follow out of alert
+	private float navTimer;					// time taken to reach next nav
+	private GameObject[] navPoints;
 	private float targetDistance;
 	private float thinkTimer;
 	private GameObject player;				// ref to player
 	private PlayerCharacter playerScript;
+	private float directionTimer;			// counts how long we've been going one way
 
 	private int audioChoice;				// sound to play from chatter
 
@@ -39,6 +47,7 @@ public class SeekerAgent : MonoBehaviour {
 	void Start () 
 	{
 		charCtrl = gameObject.GetComponent("CharacterController") as CharacterController;
+		navPoints = GameObject.FindGameObjectsWithTag("nav") as GameObject[];
 	}
 
 	void FixedUpdate ()
@@ -66,6 +75,8 @@ public class SeekerAgent : MonoBehaviour {
 		}
 
 		if (alerted) {
+			// fast!
+			currentSpeed = chaseSpeed;
 			// Chase target
 			transform.LookAt(pursuitTarget);
 			transform.eulerAngles = new Vector3(0, transform.eulerAngles.y, 0);
@@ -77,13 +88,62 @@ public class SeekerAgent : MonoBehaviour {
 					playerScript.Kill();
 				}
 			}
+		} else {
+			// normal speed
+			currentSpeed = moveSpeed;
+
+			transform.LookAt(navTarget);
+			transform.eulerAngles = new Vector3(0, transform.eulerAngles.y, 0);
+
+			directionTimer += Time.deltaTime;
+
+			if (directionTimer > directionInterval) 
+			{
+				// change direction
+				turnSpeed = -turnSpeed;
+				directionTimer = 0;
+			}
+
+			navTimer += Time.deltaTime;
+			if (navTimer > navTimeout) 
+			{
+				// change direction
+				navTarget = GetNearestNavTo(transform.position, 20f);
+				navTimer = 0;
+			}
+
+			if (Vector3.Distance(navTarget, transform.position) < 1) 
+			{
+				navTimer = 0;
+
+				// go to new nav target
+				navTarget = GetNearestNavTo(navTarget, 20f);
+			}
 		}
 
 		// move
 		forward = transform.TransformDirection(Vector3.forward);
-		charCtrl.SimpleMove(forward * moveSpeed);
+		charCtrl.SimpleMove(forward * currentSpeed);
 	}
 
+	Vector3 GetNearestNavTo (Vector3 nearPoint, float longDistance = 20.0f)
+	{
+		Vector3 newPoint = Vector3.zero;
+		foreach (GameObject navPoint in navPoints) 
+		{
+			float dist = Vector3.Distance(navPoint.transform.position, nearPoint);
+			if (dist > 1)
+			{
+				dist += Random.value * 2.0f;
+				if (dist < longDistance) 
+				{
+					longDistance = dist;
+					newPoint = navPoint.transform.position;
+				}
+			}
+		}
+		return newPoint;
+	}
 
 
 	bool CheckForPlayer ()
@@ -107,9 +167,9 @@ public class SeekerAgent : MonoBehaviour {
 
 			RaycastHit hit = new RaycastHit();
 			Vector3 lookingPoint = player.transform.position - transform.position;
-			if (Physics.Raycast (transform.position, lookingPoint, out hit, viewDistance))
+			if (Physics.Raycast (transform.position + Vector3.up, lookingPoint, out hit, viewDistance))
 			{
-				Debug.DrawLine (transform.position, hit.point, Color.red);
+				Debug.DrawLine (transform.position + Vector3.up, hit.point, Color.red);
 				Collider seesCol = hit.collider;
 				
 				if (seesCol.gameObject == player) {

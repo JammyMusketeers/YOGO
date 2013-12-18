@@ -45,7 +45,7 @@ public class Pickup : MonoBehaviour {
 		if (collectSound)
 			audio.PlayOneShot(collectSound);
 
-		target.score += points;
+		target.AddScore(points);
 
 		pickedUp = true;
 		renderer.enabled = false;

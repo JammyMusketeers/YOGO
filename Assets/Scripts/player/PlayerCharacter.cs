@@ -12,6 +12,7 @@ public class PlayerCharacter : MonoBehaviour {
 	private bool dead;
 	private float deadDelay;
 	private CharacterController charCtrl;
+	private float scoreShow;
 	private GameObject music;		// DIRTY! use game manager to disable music eventually
 
 	void Start () 
@@ -29,9 +30,10 @@ public class PlayerCharacter : MonoBehaviour {
 		{
 			GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), deathmask, ScaleMode.StretchToFill, true);
 		}
-		else if (score > 0)
+		else if (scoreShow > 0)
 		{
-			GUI.Label (new Rect(Screen.width-200, Screen.height - 100, 200, 100), "Gold: "+score);
+			GUI.color = new Color(1f, 1f, 0.2f, scoreShow);
+			GUI.Label (new Rect(Screen.width-200, Screen.height - 100, 200, 100), "Gold Collected!");
 		}
 	}
 
@@ -54,7 +56,18 @@ public class PlayerCharacter : MonoBehaviour {
 			// hide cursor
 			Screen.showCursor = false;
 			Screen.lockCursor = true;
+
+			if (scoreShow > 0)
+			{
+				scoreShow -= Time.deltaTime;
+			}
 		}
+	}
+
+	public void AddScore (int amount)
+	{
+		score += amount;
+		scoreShow += 2.0f;
 	}
 
 	public bool IsDead ()
