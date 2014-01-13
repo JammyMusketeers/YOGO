@@ -1,0 +1,11 @@
+LITH
+
+Changelog:
+
+----------------------------
+v1.1
+
+* Liths now have a slower standard speed and go a lot faster when chasing
+* Liths use path nodes to navigate corridors
+
+(TD) Footsteps

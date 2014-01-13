@@ -9,6 +9,7 @@ public class SeekerAgent : MonoBehaviour {
 	public float turnSpeed = 50f;			// how fast it turns
 	public float thinkInterval = 0.2f;		// time between AI rethinks
 	public float directionInterval = 10f;	// time between directional changes
+	public float pathVariance = 5.0f;		// randomness change to decide between nodes
 	public float navTimeout = 5.0f;			// times out getting to a waypoint after this time
 	public float searchTime = 20f;			// time to keep searching after losing sight
 	public float viewDistance = 35f;		// distance it can see
@@ -31,8 +32,9 @@ public class SeekerAgent : MonoBehaviour {
 	private bool alerted;					// seen player? if so, we will search or chase
 	public float lostSightFor;				// time since player last seen
 	private Vector3 pursuitTarget;
-	private Vector3 navTarget;				// tranform to follow out of alert
-	private float navTimer;					// time taken to reach next nav
+	public GameObject navTarget;				// tranform to follow out of alert
+	public GameObject previousNav;			// store last nav so we don't go back to it
+	public float navTimer;					// time taken to reach next nav
 	private GameObject[] navPoints;
 	private float targetDistance;
 	private float thinkTimer;
@@ -48,6 +50,8 @@ public class SeekerAgent : MonoBehaviour {
 	{
 		charCtrl = gameObject.GetComponent("CharacterController") as CharacterController;
 		navPoints = GameObject.FindGameObjectsWithTag("nav") as GameObject[];
+		previousNav = GetClosestNav();
+		navTarget = GetNextNav(transform.position, 40.0f);
 	}
 
 	void FixedUpdate ()
@@ -68,7 +72,20 @@ public class SeekerAgent : MonoBehaviour {
 		if (thinkTimer >= thinkInterval)
 		{
 			// rethink AI
-			CheckForPlayer();
+			if (CheckForPlayer()) {
+					// I SEE YOU
+					Alarm();
+			} else if (alerted) {
+					// player evading...
+					lostSightFor += thinkInterval;
+					PursuitTechniques();
+			}
+
+			if (lostSightFor > searchTime) {
+					alerted = false;
+					lostSightFor = 0;
+			}
+
 			thinkTimer = 0;
 		} else {
 			thinkTimer += Time.deltaTime;
@@ -92,7 +109,23 @@ public class SeekerAgent : MonoBehaviour {
 			// normal speed
 			currentSpeed = moveSpeed;
 
-			transform.LookAt(navTarget);
+			navTimer += Time.deltaTime;
+			if (navTimer > navTimeout) 
+			{
+				// change direction
+				navTarget = GetNextNav(transform.position, 40.0f);
+				navTimer = 0;
+			}
+			
+			if (Vector3.Distance(navTarget.transform.position, transform.position + Vector3.up) < 0.5f) 
+			{
+				navTimer = 0;
+				
+				// go to new nav target
+				navTarget = GetNextNav(navTarget.transform.position, 40.0f);
+			}
+
+			transform.LookAt(navTarget.transform.position);
 			transform.eulerAngles = new Vector3(0, transform.eulerAngles.y, 0);
 
 			directionTimer += Time.deltaTime;
@@ -103,22 +136,6 @@ public class SeekerAgent : MonoBehaviour {
 				turnSpeed = -turnSpeed;
 				directionTimer = 0;
 			}
-
-			navTimer += Time.deltaTime;
-			if (navTimer > navTimeout) 
-			{
-				// change direction
-				navTarget = GetNearestNavTo(transform.position, 20f);
-				navTimer = 0;
-			}
-
-			if (Vector3.Distance(navTarget, transform.position) < 1) 
-			{
-				navTimer = 0;
-
-				// go to new nav target
-				navTarget = GetNearestNavTo(navTarget, 20f);
-			}
 		}
 
 		// move
@@ -126,25 +143,51 @@ public class SeekerAgent : MonoBehaviour {
 		charCtrl.SimpleMove(forward * currentSpeed);
 	}
 
-	Vector3 GetNearestNavTo (Vector3 nearPoint, float longDistance = 20.0f)
+	GameObject GetNextNav (Vector3 nearPoint, float bestDistance = 20.0f)
 	{
-		Vector3 newPoint = Vector3.zero;
+		GameObject bestNav = previousNav;
 		foreach (GameObject navPoint in navPoints) 
 		{
-			float dist = Vector3.Distance(navPoint.transform.position, nearPoint);
-			if (dist > 1)
+			if (navPoint != previousNav && navPoint != navTarget)
 			{
-				dist += Random.value * 2.0f;
-				if (dist < longDistance) 
+				float dist = Vector3.Distance(navPoint.transform.position, nearPoint);
+				if (dist + Random.Range(-pathVariance, pathVariance) < bestDistance) 
 				{
-					longDistance = dist;
-					newPoint = navPoint.transform.position;
+					// can we see it?
+					RaycastHit hit = new RaycastHit();
+					Debug.DrawLine (transform.position + Vector3.up, navPoint.transform.position, Color.blue);
+					if (!Physics.Raycast (transform.position + Vector3.up, navPoint.transform.position - (transform.position + Vector3.up), out hit, dist))
+					{
+						bestDistance = dist;
+						if (navTarget != null)
+
+						Debug.Log("Can see "+navPoint.transform.position);
+						bestNav = navPoint;
+					}
+					
 				}
 			}
 		}
-		return newPoint;
+		previousNav = navTarget;
+		return bestNav;
 	}
 
+	GameObject GetClosestNav ()
+	{
+		float dist = 0.0f;
+		float bestDist = 999.0f;
+		GameObject closestNav = new GameObject();
+		foreach (GameObject navPoint in navPoints) 
+		{
+			dist = Vector3.Distance(navPoint.transform.position, transform.position);
+			if (dist < bestDist)
+			{
+				bestDist = dist;
+				closestNav = navPoint;
+			}
+		}
+		return closestNav;
+	}
 
 	bool CheckForPlayer ()
 	{
@@ -174,19 +217,10 @@ public class SeekerAgent : MonoBehaviour {
 				
 				if (seesCol.gameObject == player) {
 					// I SEE YOU
-					targetDistance = hit.distance;
-					Debug.Log (targetDistance);
 					pursuitTarget = seesCol.transform.position;
-					Alarm();
+					targetDistance = hit.distance;
+					pursuitTarget = seesCol.transform.position;
 					success = true;
-				} else if (alerted) {
-					// player evading...
-					lostSightFor += thinkInterval;
-					PursuitTechniques();
-				}
-				if (lostSightFor > searchTime) {
-					alerted = false;
-					lostSightFor = 0;
 				}
 			}
 		}
